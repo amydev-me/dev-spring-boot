@@ -19,6 +19,19 @@ public class InstructorDetail {
     @Column(name = "hobby")
     private String hobby;
 
+    /**
+     * one to one - bi
+     * mappedBy tells Hibernate
+     * Look at the instructorDetail property in the Instructor class
+     * Use information from the Instructor class@JoinColumn
+     * To help find associated instructor
+     * CascadeType.ALL = Delete/Save Instructor when user delete/save InstructorDetail
+     * Or we can add the specific type
+     */
+    @OneToOne(mappedBy = "instructorDetail",
+              cascade = {CascadeType.DETACH, CascadeType.PERSIST, CascadeType.MERGE,  CascadeType.REFRESH})
+    private Instructor instructor;
+
     public InstructorDetail(){
 
     }
@@ -50,6 +63,14 @@ public class InstructorDetail {
 
     public void setHobby(String hobby) {
         this.hobby = hobby;
+    }
+
+    public Instructor getInstructor() {
+        return instructor;
+    }
+
+    public void setInstructor(Instructor instructor) {
+        this.instructor = instructor;
     }
 
     @Override
