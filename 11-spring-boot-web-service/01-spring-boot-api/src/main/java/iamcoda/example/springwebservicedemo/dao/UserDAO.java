@@ -9,5 +9,7 @@ public interface UserDAO {
 
     public User save();
 
-    public User findById();
+    public User findById(int Id);
+
+    public void deleteById(int Id);
 }

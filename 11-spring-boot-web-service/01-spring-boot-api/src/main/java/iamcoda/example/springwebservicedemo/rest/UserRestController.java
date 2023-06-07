@@ -2,6 +2,7 @@ package iamcoda.example.springwebservicedemo.rest;
 
 import iamcoda.example.springwebservicedemo.dao.UserDaoService;
 import iamcoda.example.springwebservicedemo.entity.User;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,12 +36,18 @@ public class UserRestController {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<User> save(@RequestBody User user){
+    public ResponseEntity<User> save(@Valid @RequestBody User user){
         User savedUser = serviceDao.save(user);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                         .path("/{id}")
                         .buildAndExpand(savedUser.getId())
                         .toUri();
         return ResponseEntity.created(location).build();
+    }
+
+    @DeleteMapping("/users/{id}")
+    public  String deleteUser( @PathVariable int id){
+         serviceDao.deleteById(id);
+        return "Successfully deleted";
     }
 }

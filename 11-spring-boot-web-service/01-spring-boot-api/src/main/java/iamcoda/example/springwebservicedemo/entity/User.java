@@ -1,13 +1,22 @@
 package iamcoda.example.springwebservicedemo.entity;
 
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Size;
+
 import java.time.LocalDate;
 
 public class User {
     private Integer id;
 
+
+    @Size(min = 2, message = "Name should have at least 2 characters")
     private String name;
 
+
+    @Past(message = "Birth date sßhould be in the past!")
     private LocalDate birthDate;
 
     public User(){
@@ -32,6 +41,7 @@ public class User {
     public void setId(Integer id) {
         this.id = id;
     }
+
 
     public String getName() {
         return name;
