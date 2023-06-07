@@ -26,7 +26,12 @@ public class UserRestController {
 
     @GetMapping("/users/{id}")
     public  User retrieveUser(@PathVariable int id){
-        return serviceDao.findById(id);
+        User user =  serviceDao.findById(id);
+        if(user == null){
+            throw new UserNotFoundException("id" + id);
+        }
+
+        return user;
     }
 
     @PostMapping("/users")
