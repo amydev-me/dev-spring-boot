@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import iamcoda.example.springwebservicedemo.dao.UserDaoService;
 import iamcoda.example.springwebservicedemo.entity.Post;
 import iamcoda.example.springwebservicedemo.entity.User;
+import iamcoda.example.springwebservicedemo.repository.PostRepository;
 import iamcoda.example.springwebservicedemo.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,45 +26,14 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 public class UserJpaResource {
-    private UserDaoService serviceDao;
 
     private UserRepository repository;
-
+    private PostRepository postRepository;
     @Autowired
-    public UserJpaResource(UserDaoService serviceDao, UserRepository repository){
+    public UserJpaResource(UserRepository repository, PostRepository postRepository){
         this.repository = repository;
-        this.serviceDao = serviceDao;
+        this.postRepository = postRepository;
     }
-
-    @GetMapping("/jpa/filtering/{id}")
-    public MappingJacksonValue filtering(@PathVariable int id){
-        User user =  serviceDao.findById(id);
-        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(user);
-        SimpleBeanPropertyFilter filter =
-                SimpleBeanPropertyFilter.filterOutAllExcept("user_name", "birth_date");
-
-        FilterProvider filters =
-                new SimpleFilterProvider().addFilter("SomeBeanFilter", filter);
-
-        mappingJacksonValue.setFilters(filters);
-        return mappingJacksonValue;
-    }
-
-    @GetMapping("/jpa/filtering-list")
-    public MappingJacksonValue filteringList(){
-        List<User> users = serviceDao.findAll();
-        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(users);
-
-        SimpleBeanPropertyFilter filter =
-                SimpleBeanPropertyFilter.filterOutAllExcept("user_name", "birth_date");
-
-        FilterProvider filters =
-                new SimpleFilterProvider().addFilter("SomeBeanFilter", filter);
-
-        mappingJacksonValue.setFilters(filters);
-        return mappingJacksonValue;
-    }
-
 
     @GetMapping("/jpa/hide-field")
     public EntityModel<User> retrieveUserWithoutPassword(@PathVariable int id){
@@ -123,5 +93,21 @@ public class UserJpaResource {
         EntityModel<User> entityModel = EntityModel.of(user.get());
 
         return user.get().getPosts();
+    }
+
+    @PostMapping("/jpa/users/{id}/posts")
+    public ResponseEntity<Post> createPostForUser(@PathVariable int id, @Valid @RequestBody Post post){
+        Optional<User> user=  repository.findById(id);
+        if(user.isEmpty()){
+            throw new UserNotFoundException("id" + id);
+        }
+        post.setUser(user.get());
+        Post savedPost = postRepository.save(post);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(savedPost.getId())
+                .toUri();
+        return ResponseEntity.created(location).build();
+//        return user.get().getPosts();
     }
 }
